@@ -66,6 +66,21 @@ def plot_stats(values, stats):
 
 
 def stats(model_type, values, X, y, folds = 10):
+    """
+    Get the statistics of the model. This does K Folds with a range of
+    metaparameter values on a certain model type, and returns the parameter
+    value that has the highest validation accuracy.
+
+    Input:
+    - model_type: str specifying what type of model is being crossvalidated.
+      Either 'knn', 'tree' or 'reg'.
+    - values: iterable containing the values for the metaparameter.
+    - X, y: iterables containing the training data and their respective output.
+    - folds: how many folds are going to be done. Defaults to 10.
+
+    Output:
+    - lambda_opt: value of the metaparameter with the best performance.
+    """
     Xtr = X[:20000, :]
     ytr = y[:20000]
     Xte = X[20000:, :]
@@ -98,6 +113,20 @@ def stats(model_type, values, X, y, folds = 10):
 
 
 def estimation(model, X, y):
+    """
+    Compare the error of the model with the training and test samples, by
+    varying the size of the training sample.
+
+    Input:
+    - model: model to be tested.
+    - X, y: LS sample. X are the attributes, y the output.
+
+    Output:
+    - Figure of the realtionship between training size and errors.
+
+    NOTE: STILL NEED TO ADD REPETITIONS TO THIS, SO THAT THE CURVES ARE SMOOTH
+    AND WE CAN ACTUALLY SEE NICE THINGS.
+    """
     proportions = np.arange(10, 91, 1)
     errors = np.zeros((len(proportions), 2))
     for ii, per in enumerate(proportions):
