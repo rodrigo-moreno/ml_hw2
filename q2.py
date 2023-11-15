@@ -4,6 +4,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.linear_model import Ridge
 from sklearn.model_selection import KFold
+from sklearn.metrics import mean_squared_error
 
 from data import load_superconduct
 
@@ -11,7 +12,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 sns.set_theme()
-
 def splitting():
     """
     A function that deals with splitting the information in the required
@@ -65,6 +65,89 @@ def plot_stats(values, stats):
     return fig
 
 
+def variance_bias_computation(model_type,hvalue, X_train, y_train, X_test, y_test, num_rounds, random_seed):
+    """
+        A function that computes the expected error, variance and bias values for a certain model.
+
+        Input:
+        - model_type: str specifying what type of model is being studied
+        - hvalue: value of the hyper-parameter integrated in the model
+        - X_train: Training set features
+        - y_train: Training set labels
+        - X_test: Test set features
+        - y_test: Testing set labels
+        - num_rounds: Number of rounds for training
+        - random_seed
+
+        Output:
+        - avg_expected_loss: average expected loss for the given model
+        - avg_bias: average bias for the given model
+        - avg_variance: average variance for the given model
+
+        Todo: change the num_rounds stuff and implement KFOLD: between lines 95 and 99
+        """
+
+    np.random.seed(random_seed)
+
+    errors = []
+    all_predictions = np.zeros((num_rounds, len(y_test)))
+
+    for i in range(num_rounds):
+        # Random subset of training set (?)
+        indices = np.random.choice(len(X_train), len(X_train), replace=True)
+        X_train_subset = X_train[indices]
+        y_train_subset = y_train[indices]
+
+        model = dispatch(model_type, hvalue)
+
+        trained_model = model.fit(X_train_subset, y_train_subset)
+        predictions = trained_model.predict(X_test)
+
+        all_predictions[i] = predictions
+        errors.append(mean_squared_error(y_test, predictions))
+
+    avg_expected_loss = np.mean(errors)
+    avg_predictions = np.mean(all_predictions, axis=0)
+    avg_bias = np.mean((avg_predictions - y_test) ** 2)
+    avg_var = np.mean(np.var(all_predictions, axis=0))
+
+    return avg_expected_loss, avg_bias, avg_var
+
+
+def models_assessment(model_type, hvalue, X_train, y_train, X_test, y_test):
+    """
+    Parameters
+    ----------
+    model_type: string. Represents the type of model required.
+    hvalue: array containing hyperparameter values
+    X_train: array containing training samples
+    y_train: array containing training labels
+    X_test: array containing test samples
+    y_test: array containing test labels
+
+    """
+    bias_Class, var_Class, error_Class, = [], [], []
+
+    for k in range(1, len(hvalue)):
+
+        avg_expected_loss, avg_bias, avg_var = variance_bias_computation(model_type, hvalue[k], X_train, y_train, X_test,
+                                                                         y_test, random_seed=123, num_rounds=len(hvalue))
+        bias_Class.append(avg_bias)
+        var_Class.append(avg_var)
+        error_Class.append(avg_expected_loss)
+        print(f"Average expected loss with model {model_type} and hyperparameter {hvalue[k]}: {avg_expected_loss}")
+        print(f"Average bias with model {model_type} and hyperparameter {hvalue[k]}: {avg_bias}")
+        print(f"Average variance with model {model_type} and hyperparameter {hvalue[k]}: {avg_var}")
+
+    plt.plot(range(1, len(hvalue)), error_Class, 'red', label='total_error', linestyle='dashed')
+    plt.plot(range(1, len(hvalue)), bias_Class, 'brown', label='bias^2')
+    plt.plot(range(1, len(hvalue)), var_Class, 'yellow', label='variance')
+    plt.xlabel(f'Algorithm Complexity: {model_type}')
+    plt.ylabel('Error')
+    plt.legend()
+    plt.show()
+    return
+
 def stats(model_type, values, X, y, folds = 10):
     """
     Get the statistics of the model. This does K Folds with a range of
@@ -92,8 +175,8 @@ def stats(model_type, values, X, y, folds = 10):
         fit_acc = np.zeros(folds)
         pred_acc = np.zeros(folds)
 
-        skf = KFold(n_splits = folds, shuffle = True,
-                              random_state = 0)
+        skf = KFold(n_splits = folds, shuffle = True,random_state = 0)
+
         for fold, (tr_idx, te_idx) in enumerate(skf.split(Xte, yte)):
             model.fit(Xtr[tr_idx], ytr[tr_idx])
             fit_acc[fold] = model.score(Xtr[tr_idx], ytr[tr_idx])
@@ -107,70 +190,34 @@ def stats(model_type, values, X, y, folds = 10):
     fig.suptitle(f'Accuracy of {model_type} model over CV with {folds} folds')
     plt.savefig(f'{model_type}_{folds}folds_{min(values)}to{max(values)}.pdf',
                 format = 'pdf')
-    #plt.show()
+    plt.show()
+
     best = np.argmax(stats[:, 2])
     return values[best]
 
 
-def estimation(model, X, y):
-    """
-    Compare the error of the model with the training and test samples, by
-    varying the size of the training sample.
-
-    Input:
-    - model: model to be tested.
-    - X, y: LS sample. X are the attributes, y the output.
-
-    Output:
-    - Figure of the realtionship between training size and errors.
-
-    NOTE: STILL NEED TO ADD REPETITIONS TO THIS, SO THAT THE CURVES ARE SMOOTH
-    AND WE CAN ACTUALLY SEE NICE THINGS.
-    """
-    proportions = np.arange(10, 91, 1)
-    errors = np.zeros((len(proportions), 2))
-    for ii, per in enumerate(proportions):
-        idx = int(np.round(len(y) * per/100))
-        Xtr = X[:idx, :]
-        ytr = y[:idx]
-        Xte = X[idx:, :]
-        yte = y[idx:]
-
-        model.fit(Xtr, ytr)
-        errors[ii, 0] = 1 - model.score(Xtr, ytr)
-        errors[ii, 1] = 1 - model.score(Xte, yte)
-
-    fig, ax = plt.subplots()
-    ax.plot(proportions, errors[:, 0], 'b')
-    ax.plot(proportions, errors[:, 1], 'r')
-    ax.legend(['Training', 'Test'])
-    ax.set_ylabel('Error')
-    ax.set_xlabel('Percentual size of training sample (%)')
-    #plt.show()
-    return fig
-
-
 if __name__ == '__main__':
+    # load dataset and distribute data.
     X, y = load_superconduct()
+    number_of_ls = 500
+    X_train = X[0:number_of_ls, :]
+    y_train = y[0:number_of_ls]
+    X_test = X[number_of_ls:, :]
+    y_test = y[number_of_ls:]
 
+
+    # assesment of Decision Tree
     model_type = 'tree'
     metaparameters = np.arange(1, 50, 2)
-    best = stats(model_type, metaparameters, X, y)
-    #print(f'Chose model with parameter = {best}')
-    estimation(dispatch(model_type, best), X, y)
-    plt.savefig(f'{model_type}_estimation.pdf', format = 'pdf')
+    models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
 
+    # assesment of Ridge Regression
     model_type = 'reg'
     metaparameters = np.arange(1, 50, 2)
-    best = stats(model_type, metaparameters, X, y)
-    #print(f'Chose model with parameter = {best}')
-    estimation(dispatch(model_type, best), X, y)
-    plt.savefig(f'{model_type}_estimation.pdf', format = 'pdf')
+    models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
 
+    # assesment of KNN
     model_type = 'knn'
     metaparameters = np.arange(1, 50, 2)
-    best = stats(model_type, metaparameters, X, y)
-    #print(f'Chose model with parameter = {best}')
-    estimation(dispatch(model_type, best), X, y)
-    plt.savefig(f'{model_type}_estimation.pdf', format = 'pdf')
+    models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
 
