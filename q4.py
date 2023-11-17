@@ -10,27 +10,9 @@ from data import load_superconduct
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import q2
 
 sns.set_theme()
-def dispatch(mtype, hvalue):
-    """
-    A function that dispatches the model with the required metaparameter value.
-
-    Input:
-    - mtype: string. Represents the type of model required.
-    - hvalue: int. Represents the value of the complexity metaparameter.
-
-    Output:
-    - model: a model of the required type with the required metaparameter value
-    """
-    if mtype.lower() == 'knn':
-        return KNeighborsRegressor(n_neighbors = hvalue)
-    elif mtype.lower() == 'tree':
-        return DecisionTreeRegressor(max_depth = hvalue)
-    elif mtype.lower() == 'reg':
-        return Ridge(alpha = hvalue)
-    else:
-        raise TypeError(f'Model of type {mtype} is not supported.')
 
 def stats(model_type, values, X, y, folds = 10):
     """
@@ -55,7 +37,7 @@ def stats(model_type, values, X, y, folds = 10):
 
     stats = np.zeros((len(values), 4))
     for ii, val in enumerate(values):
-        model = dispatch(model_type, val)
+        model = q2.dispatch(model_type, val)
         fit_acc = np.zeros(folds)
         pred_acc = np.zeros(folds)
 
@@ -72,56 +54,6 @@ def stats(model_type, values, X, y, folds = 10):
 
     best = np.argmax(stats[:, 2])
     return values[best]
-
-
-def variance_bias_computation(model_type,hvalue, X_train, y_train, X_test, y_test, num_rounds, random_seed):
-    """
-        A function that computes the expected error, variance and bias values for a certain model.
-
-        Input:
-        - model_type: str specifying what type of model is being studied
-        - hvalue: value of the hyper-parameter integrated in the model
-        - X_train: Training set features
-        - y_train: Training set labels
-        - X_test: Test set features
-        - y_test: Testing set labels
-        - num_rounds: Number of rounds for training
-        - random_seed
-
-        Output:
-        - avg_expected_loss: average expected loss for the given model
-        - avg_bias: average bias for the given model
-        - avg_variance: average variance for the given model
-
-        Todo: change the num_rounds stuff and implement KFOLD: between lines 95 and 99
-        """
-
-    np.random.seed(random_seed)
-
-    errors = []
-    all_predictions = np.zeros((num_rounds, len(y_test)))
-
-    for i in range(num_rounds):
-        # Random subset of training set (?)
-        indices = np.random.choice(len(X_train), len(X_train), replace=True)
-        X_train_subset = X_train[indices]
-        y_train_subset = y_train[indices]
-
-        model = dispatch(model_type, hvalue)
-
-        trained_model = model.fit(X_train_subset, y_train_subset)
-        predictions = trained_model.predict(X_test)
-
-        all_predictions[i] = predictions
-        errors.append(mean_squared_error(y_test, predictions))
-
-    avg_expected_loss = np.mean(errors)
-    avg_predictions = np.mean(all_predictions, axis=0)
-    avg_bias = np.mean((avg_predictions - y_test) ** 2)
-    avg_var = np.mean(np.var(all_predictions, axis=0))
-
-    return avg_expected_loss, avg_bias, avg_var
-
 
 def estimation(model_type, hvalue,X, y):
     """
@@ -148,8 +80,8 @@ def estimation(model_type, hvalue,X, y):
 
         X_test = X[idx:, :]
         y_test = y[idx:]
-        avg_expected_loss, avg_bias, avg_var = variance_bias_computation(model_type, hvalue, X_train, y_train, X_test,
-                                                                         y_test, random_seed=123, num_rounds=100)
+        avg_expected_loss, avg_bias, avg_var = q2.variance_bias_computation_kfold(model_type, hvalue, X_train, y_train, X_test,
+                                                                         y_test, random_seed=123, n_splits=10)
         bias_Class.append(avg_bias)
         var_Class.append(avg_var)
         error_Class.append(avg_expected_loss)
