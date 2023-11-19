@@ -114,6 +114,7 @@ if __name__ == '__main__':
     std, bias, error = foo(model_type, hvalue, models, X, y)
     f = plot_boot(models, std, bias, error)
     plt.savefig(f'{model_type}_boot.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}_boot.png', format = 'png')
 
     model_type = 'reg'
     hvalue = 2
@@ -122,6 +123,7 @@ if __name__ == '__main__':
     std, bias, error = foo(model_type, hvalue, models, X, y)
     f = plot_boot(models, std, bias, error)
     plt.savefig(f'{model_type}_boot.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}_boot.png', format = 'png')
 
     model_type = 'tree'
     hvalue = None
@@ -130,4 +132,5 @@ if __name__ == '__main__':
     std, bias, error = foo(model_type, hvalue, models, X, y)
     f = plot_boot(models, std, bias, error)
     plt.savefig(f'{model_type}_boot.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}_boot.png', format = 'png')
 
