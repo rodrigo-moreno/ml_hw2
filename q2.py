@@ -121,13 +121,13 @@ def models_assessment(model_type, hvalues, X_train, y_train, X_test, y_test):
         #print(f"Average variance with model {model_type} and hyperparameter {hvalue[k]}: {avg_var}")
 
     fig, ax = plt.subplots()
-    ax.plot(hvalues, error_Class, 'red', label='total_error', linestyle='dashed')
     ax.plot(hvalues, bias_Class, 'brown', label='bias^2')
     ax.plot(hvalues, var_Class, 'yellow', label='variance')
+    ax.plot(hvalues, error_Class, 'red', label='total_error', linestyle='dashed')
     ax.set_xlabel(f'Algorithm Complexity: {model_type}')
     ax.set_ylabel('Error')
     ax.legend()
-    plt.savefig(f'{model_type}_{len(y_train)}_assessment.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}_{len(y_train)+len(y_test)}_assessment.pdf', format = 'pdf')
     #plt.show()
     return
 
@@ -136,10 +136,11 @@ if __name__ == '__main__':
     # load dataset and distribute data.
     X, y = load_superconduct()
     number_of_ls = 500
-    X_train = X[0:number_of_ls, :]
-    y_train = y[0:number_of_ls]
-    X_test = X[number_of_ls:, :]
-    y_test = y[number_of_ls:]
+    X_train = X[0:int(np.ceil(number_of_ls*0.7)), :]
+    y_train = y[0:int(np.ceil(number_of_ls*0.7))]
+
+    X_test = X[int(np.ceil(number_of_ls*0.7)):number_of_ls, :]
+    y_test = y[int(np.ceil(number_of_ls*0.7)):number_of_ls]
 
     # assesment of Decision Tree
     model_type = 'tree'
@@ -150,7 +151,6 @@ if __name__ == '__main__':
     # assesment of Ridge Regression
     model_type = 'reg'
     metaparameters = np.arange(0, 11, 2)
-    #metaparameters = np.linspace(0, 5000, 10)
     models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
     print(f'Finished {model_type}')
 
@@ -159,4 +159,3 @@ if __name__ == '__main__':
     metaparameters = np.arange(1, 11, 1)
     models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
     print(f'Finished {model_type}')
-
