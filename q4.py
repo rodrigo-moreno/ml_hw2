@@ -73,20 +73,26 @@ def estimation(model_type, hvalue, X, y):
     NOTE: STILL NEED TO ADD REPETITIONS TO THIS, SO THAT THE CURVES ARE SMOOTH
     AND WE CAN ACTUALLY SEE NICE THINGS.
     """
-    proportions = np.arange(10, 91, 1)
-    bias_Class, var_Class, error_Class, = [], [], []
+    proportions = np.arange(10, 91, 10)
+    bias_Class = np.zeros(len(proportions))
+    var_Class = np.zeros(len(proportions))
+    error_Class = np.zeros(len(proportions))
     for ii, per in enumerate(proportions):
         idx = int(np.round(len(y) * per/100))
         X_train = X[:idx, :]
         y_train = y[:idx]
 
-        X_test = X[idx:, :]
-        y_test = y[idx:]
-        avg_expected_loss, avg_bias, avg_var = q2.variance_bias_computation_kfold(model_type, hvalue, X_train, y_train, X_test,
-                                                                         y_test, random_seed=123, n_splits=10)
-        bias_Class.append(avg_bias)
-        var_Class.append(avg_var)
-        error_Class.append(avg_expected_loss)
+        X_val = X[idx:, :]
+        y_val = y[idx:]
+        avg_expected_loss, avg_bias, avg_var = q2.variance_bias_computation_kfold(model_type, hvalue, X_train, y_train, X_val,
+                                                                         y_val, random_seed=123, n_splits=10)
+        bias_Class[ii] = avg_bias
+        var_Class[ii] = avg_var
+        error_Class[ii] = avg_expected_loss
+
+    print(f'Bias: {bias_Class}')
+    print(f'Var: {var_Class}')
+    print(f'Error: {error_Class}')
 
     fig, ax = plt.subplots()
     plt.plot(enumerate(proportions), error_Class, 'red', label='total_error', linestyle='dashed')
@@ -99,15 +105,14 @@ def estimation(model_type, hvalue, X, y):
     return fig
 
 
-
 if __name__ == '__main__':
     # load dataset and distribute data.
     X, y = load_superconduct()
+    
     model_type = 'tree'
-
     metaparameters = np.arange(1, 50, 2)
     best = stats(model_type, metaparameters, X, y)
-    print(f'Regression tree: chose model with parameter= {best}') # Change
+    print(f'Regression tree: chose model with parameter = {best}') # Change
     estimation(model_type, best, X, y)
 
     model_type = 'knn'
