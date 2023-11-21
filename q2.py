@@ -15,13 +15,6 @@ sns.set_theme()
 
 np.random.seed(1)
 
-def splitting():
-    """
-    A function that deals with splitting the information in the required
-    subsets.
-    """
-    pass
-
 
 def dispatch(mtype, hvalue):
     """
@@ -83,12 +76,7 @@ def variance_bias_computation_kfold(model_type, hvalue, X_train, y_train,
 
         all_predictions[fold_idx, :] = predictions
         errors[fold_idx] = mean_squared_error(y_test, predictions)
-        #print(predictions[:5])
-        #print(y_test[:5])
-        #print(y_test[:5] - predictions[:5])
-        #print(errors[fold_idx])
 
-    # Calculate average expected loss, bias, and variance
     avg_expected_loss = np.mean(errors)
     avg_predictions = np.mean(all_predictions, axis=0)
     avg_bias = np.mean((avg_predictions - y_test) ** 2)
@@ -108,20 +96,15 @@ def models_assessment(model_type, hvalues, X_train, y_train, X_test, y_test):
     X_test: array containing test samples
     y_test: array containing test labels
     """
-    #bias_Class, var_Class, error_Class, = [], [], []
-
     bias_Class = np.zeros(len(hvalues))
     var_Class = np.zeros(len(hvalues))
     error_Class = np.zeros(len(hvalues))
-    for ii, kk in enumerate(hvalues):#range(len(hvalue)):
+    for ii, kk in enumerate(hvalues):
         avg_expected_loss, avg_bias, avg_var = variance_bias_computation_kfold(model_type, kk, X_train, y_train,
-                                                                       X_test ,y_test, random_seed=123, n_splits=10)
+                                                                       X_test, y_test, random_seed=123, n_splits=10)
         bias_Class[ii] = avg_bias
         var_Class[ii] = avg_var
         error_Class[ii] = avg_expected_loss
-        #print(f"Average expected loss with model {model_type} and hyperparameter {hvalue[k]}: {avg_expected_loss}")
-        #print(f"Average bias with model {model_type} and hyperparameter {hvalue[k]}: {avg_bias}")
-        #print(f"Average variance with model {model_type} and hyperparameter {hvalue[k]}: {avg_var}")
 
     fig, ax = plt.subplots()
     ax.plot(hvalues, var_Class, 'b')
@@ -138,13 +121,13 @@ def models_assessment(model_type, hvalues, X_train, y_train, X_test, y_test):
 
 
 if __name__ == '__main__':
-    # load dataset and distribute data.
     X, y = load_superconduct()
     number_of_ls = 500
-    X_train = X[0:number_of_ls, :]
-    y_train = y[0:number_of_ls]
-    X_test = X[number_of_ls:, :]
-    y_test = y[number_of_ls:]
+    X_train = X[0:int(np.ceil(number_of_ls*0.7)), :]
+    y_train = y[0:int(np.ceil(number_of_ls*0.7))]
+
+    X_test = X[int(np.ceil(number_of_ls*0.7)):number_of_ls, :]
+    y_test = y[int(np.ceil(number_of_ls*0.7)):number_of_ls]
 
     # assesment of Decision Tree
     model_type = 'tree'
@@ -155,7 +138,6 @@ if __name__ == '__main__':
     # assesment of Ridge Regression
     model_type = 'reg'
     metaparameters = np.arange(0, 11, 2)
-    #metaparameters = np.linspace(0, 5000, 10)
     models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
     print(f'Finished {model_type}')
 
@@ -164,4 +146,3 @@ if __name__ == '__main__':
     metaparameters = np.arange(1, 11, 1)
     models_assessment(model_type, metaparameters, X_train, y_train, X_test, y_test)
     print(f'Finished {model_type}')
-
