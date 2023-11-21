@@ -16,8 +16,9 @@ import seaborn as sns
 
 sns.set_theme()
 
+np.random.seed(1)
 
-def bootstrap_statistics(model_type, hvalue, N, Xtr, ytr, Xte, yte):
+def bootstrap_prediction(model_type, hvalue, N, Xtr, ytr, Xte, yte):
     """
     Makes a prediction of the data Xte using N different models and bootstrap
     sampling.
@@ -45,7 +46,7 @@ def bootstrap_statistics(model_type, hvalue, N, Xtr, ytr, Xte, yte):
     return pred
 
 
-def foo(model_type, hvalue, models, X, y, repetitions = 10):
+def bootstrap_iterations(model_type, hvalue, models, X, y, repetitions = 10):
     """
     Calculates the bias, error and var of prediction with a certain model type,
     using bootstrap sampling.
@@ -79,7 +80,7 @@ def foo(model_type, hvalue, models, X, y, repetitions = 10):
         preds = np.zeros((repetitions, len(yte)))
         error = np.zeros(repetitions)
         for rep in range(repetitions):
-            preds[rep, :] = bootstrap_statistics(model_type, hvalue,
+            preds[rep, :] = bootstrap_prediction(model_type, hvalue,
                                                  amount, Xtr, ytr, Xte, yte)
             error[rep] = mean_squared_error(yte, preds[rep, :])
             print(f'Round {rep}, error {error[rep]}')
@@ -111,7 +112,7 @@ if __name__ == '__main__':
     hvalue = 2
     models = np.arange(1, 61, 10)
     #models = [1, 5, 10]
-    std, bias, error = foo(model_type, hvalue, models, X, y)
+    std, bias, error = bootstrap_iterations(model_type, hvalue, models, X, y)
     f = plot_boot(models, std, bias, error)
     plt.savefig(f'{model_type}_boot.pdf', format = 'pdf')
     plt.savefig(f'{model_type}_boot.png', format = 'png')
@@ -120,7 +121,7 @@ if __name__ == '__main__':
     hvalue = 2
     models = np.arange(1, 61, 10)
     #models = [1, 5, 10]
-    std, bias, error = foo(model_type, hvalue, models, X, y)
+    std, bias, error = bootstrap_iterations(model_type, hvalue, models, X, y)
     f = plot_boot(models, std, bias, error)
     plt.savefig(f'{model_type}_boot.pdf', format = 'pdf')
     plt.savefig(f'{model_type}_boot.png', format = 'png')
@@ -129,7 +130,7 @@ if __name__ == '__main__':
     hvalue = None
     models = np.arange(1, 61, 10)
     #models = [1, 5, 10]
-    std, bias, error = foo(model_type, hvalue, models, X, y)
+    std, bias, error = bootstrap_iterations(model_type, hvalue, models, X, y)
     f = plot_boot(models, std, bias, error)
     plt.savefig(f'{model_type}_boot.pdf', format = 'pdf')
     plt.savefig(f'{model_type}_boot.png', format = 'png')
