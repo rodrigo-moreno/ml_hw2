@@ -95,13 +95,17 @@ def estimation(model_type, hvalue, X, y):
     print(f'Error: {error_Class}')
 
     fig, ax = plt.subplots()
-    plt.plot(enumerate(proportions), error_Class, 'red', label='total_error', linestyle='dashed')
-    plt.plot(enumerate(proportions), bias_Class, 'brown', label='bias^2')
-    plt.plot(enumerate(proportions), var_Class, 'yellow', label='variance')
-    plt.xlabel(f'Algorithm Complexity: {model_type}')
-    plt.ylabel('Error')
-    plt.legend()
-    plt.show()
+    ax.plot(proportions, var_Class, 'b')
+    ax.plot(proportions, bias_Class, 'r')
+    ax.plot(proportions, error_Class, 'k')
+    ax.plot(proportions, var_Class + bias_Class, 'r:')
+    ymin, ymax = ax.get_ylim()
+    ax.set_ylim(-5, ymax)
+    ax.legend([r'$\sigma^2$', r'bias$^2$', r'Error', r'$\sigma^2 + bias^2$'],
+              fontsize = 24)
+    ax.set_xlabel(r'Proportion of $LS$ used for training (%)',
+                  fontsize = 24)
+    #plt.show()
     return fig
 
 
@@ -114,15 +118,27 @@ if __name__ == '__main__':
     best = stats(model_type, metaparameters, X, y)
     print(f'Regression tree: chose model with parameter = {best}') # Change
     estimation(model_type, best, X, y)
+    plt.savefig(f'{model_type}_{best}.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}_{best}.png', format = 'png')
+    
+    print('Starting fully grown trees')
+    estimation(model_type, None, X, y)
+    plt.savefig(f'{model_type}.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}.png', format = 'png')
 
     model_type = 'knn'
     metaparameters = np.arange(1, 50, 2)
     best = stats(model_type, metaparameters, X, y)
     print(f'KNN: chose model with parameter = {best}')
     estimation(model_type,best, X, y)
+    plt.savefig(f'{model_type}.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}.png', format = 'png')
 
     model_type = 'reg'
     metaparameters = np.arange(1, 50, 2)
     best = stats(model_type, metaparameters, X, y)
     print(f'Ridge regreesion: chose model with parameter = {best}')
     estimation(model_type,best, X, y)
+    plt.savefig(f'{model_type}.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}.png', format = 'png')
+
