@@ -12,12 +12,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 sns.set_theme()
-def splitting():
-    """
-    A function that deals with splitting the information in the required
-    subsets.
-    """
-    pass
 
 
 def dispatch(mtype, hvalue):
@@ -80,12 +74,7 @@ def variance_bias_computation_kfold(model_type, hvalue, X_train, y_train,
 
         all_predictions[fold_idx, :] = predictions
         errors[fold_idx] = mean_squared_error(y_test, predictions)
-        #print(predictions[:5])
-        #print(y_test[:5])
-        #print(y_test[:5] - predictions[:5])
-        #print(errors[fold_idx])
 
-    # Calculate average expected loss, bias, and variance
     avg_expected_loss = np.mean(errors)
     avg_predictions = np.mean(all_predictions, axis=0)
     avg_bias = np.mean((avg_predictions - y_test) ** 2)
@@ -105,35 +94,29 @@ def models_assessment(model_type, hvalues, X_train, y_train, X_test, y_test):
     X_test: array containing test samples
     y_test: array containing test labels
     """
-    #bias_Class, var_Class, error_Class, = [], [], []
-
     bias_Class = np.zeros(len(hvalues))
     var_Class = np.zeros(len(hvalues))
     error_Class = np.zeros(len(hvalues))
-    for ii, kk in enumerate(hvalues):#range(len(hvalue)):
+    for ii, kk in enumerate(hvalues):
         avg_expected_loss, avg_bias, avg_var = variance_bias_computation_kfold(model_type, kk, X_train, y_train,
-                                                                       X_test ,y_test, random_seed=123, n_splits=10)
+                                                                       X_test, y_test, random_seed=123, n_splits=10)
         bias_Class[ii] = avg_bias
         var_Class[ii] = avg_var
         error_Class[ii] = avg_expected_loss
-        #print(f"Average expected loss with model {model_type} and hyperparameter {hvalue[k]}: {avg_expected_loss}")
-        #print(f"Average bias with model {model_type} and hyperparameter {hvalue[k]}: {avg_bias}")
-        #print(f"Average variance with model {model_type} and hyperparameter {hvalue[k]}: {avg_var}")
 
     fig, ax = plt.subplots()
-    ax.plot(hvalues, bias_Class, 'brown', label='bias^2')
-    ax.plot(hvalues, var_Class, 'yellow', label='variance')
-    ax.plot(hvalues, error_Class, 'red', label='total_error', linestyle='dashed')
-    ax.set_xlabel(f'Algorithm Complexity: {model_type}')
+    ax.plot(hvalues, bias_Class, 'brown', label='$bias^{2}$')
+    ax.plot(hvalues, var_Class, 'mediumblue', label='$\sigma$')
+    ax.plot(hvalues, error_Class, 'black', label='Error')
+    ax.plot(hvalues, bias_Class + var_Class, 'orange', label='$\sigma^{2} + bias^{2} $', linestyle='dotted')
+    ax.set_xlabel(f'Metaparameter value')
     ax.set_ylabel('Error')
     ax.legend()
     plt.savefig(f'{model_type}_{len(y_train)+len(y_test)}_assessment.pdf', format = 'pdf')
-    #plt.show()
     return
 
 
 if __name__ == '__main__':
-    # load dataset and distribute data.
     X, y = load_superconduct()
     number_of_ls = 500
     X_train = X[0:int(np.ceil(number_of_ls*0.7)), :]
