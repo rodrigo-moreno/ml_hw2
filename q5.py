@@ -76,19 +76,23 @@ def bootstrap_iterations(model_type, hvalue, models, X, y, repetitions = 10):
     errors = np.zeros(len(models))
 
     for ii, amount in enumerate(models):
-        print(f'Working on model with {amount} predictors.')
+        #print(f'Working on model with {amount} predictors.')
         preds = np.zeros((repetitions, len(yte)))
         error = np.zeros(repetitions)
         for rep in range(repetitions):
             preds[rep, :] = bootstrap_prediction(model_type, hvalue,
                                                  amount, Xtr, ytr, Xte, yte)
             error[rep] = mean_squared_error(yte, preds[rep, :])
-            print(f'Round {rep}, error {error[rep]}')
+            #print(f'Round {rep}, error {error[rep]}')
         varis[ii] = np.mean(np.var(preds, axis = 0))
         mean_pred = np.mean(preds, axis = 0)
         biases[ii] = np.mean((mean_pred - yte) ** 2)
         errors[ii] = np.mean(error)
-        print(errors[ii])
+        #print(errors[ii])
+
+    print(f'Var: {varis}')
+    print(f'Bias: {biases}')
+    print(f'Error: {errors}')
 
     return varis, biases, errors
 
