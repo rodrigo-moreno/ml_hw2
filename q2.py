@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 sns.set_theme()
+
+np.random.seed(1)
+
 def splitting():
     """
     A function that deals with splitting the information in the required
@@ -121,13 +124,15 @@ def models_assessment(model_type, hvalues, X_train, y_train, X_test, y_test):
         #print(f"Average variance with model {model_type} and hyperparameter {hvalue[k]}: {avg_var}")
 
     fig, ax = plt.subplots()
-    ax.plot(hvalues, error_Class, 'red', label='total_error', linestyle='dashed')
-    ax.plot(hvalues, bias_Class, 'brown', label='bias^2')
-    ax.plot(hvalues, var_Class, 'yellow', label='variance')
-    ax.set_xlabel(f'Algorithm Complexity: {model_type}')
-    ax.set_ylabel('Error')
-    ax.legend()
+    ax.plot(hvalues, var_Class, 'b')
+    ax.plot(hvalues, bias_Class, 'r')
+    ax.plot(hvalues, error_Class, 'k')
+    ax.plot(hvalues, var_Class + bias_Class, 'r:')
+    ax.legend([r'$\sigma^2$', r'bias$^2$', r'Error', r'$\sigma^2 + bias^2$'],
+              fontsize = 24)
+    ax.set_xlabel(f'Metaparameter value', fontsize = 24)
     plt.savefig(f'{model_type}_{len(y_train)}_assessment.pdf', format = 'pdf')
+    plt.savefig(f'{model_type}_{len(y_train)}_assessment.png', format = 'png')
     #plt.show()
     return
 
