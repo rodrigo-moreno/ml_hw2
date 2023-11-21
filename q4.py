@@ -14,6 +14,8 @@ import q2
 
 sns.set_theme()
 
+np.random.seed(1)
+
 def stats(model_type, values, X, y, folds = 10):
     """
     Get the statistics of the model. This does K Folds with a range of
@@ -55,7 +57,7 @@ def stats(model_type, values, X, y, folds = 10):
     best = np.argmax(stats[:, 2])
     return values[best]
 
-def estimation(model_type, hvalue,X, y):
+def estimation(model_type, hvalue, X, y):
     """
     Compare the error of the model with the training and test samples, by
     varying the size of the training sample.
