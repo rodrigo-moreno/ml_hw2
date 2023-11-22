@@ -9,7 +9,7 @@ from sklearn.utils import resample
 
 from data import load_superconduct
 
-from q2 import dispatch
+from q2_3 import dispatch
 
 import matplotlib.pyplot as plt
 import seaborn as sns

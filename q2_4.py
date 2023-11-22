@@ -10,7 +10,7 @@ from data import load_superconduct
 
 import matplotlib.pyplot as plt
 import seaborn as sns
-import q2
+import q2_3
 
 sns.set_theme()
 
@@ -39,7 +39,7 @@ def stats(model_type, values, X, y, folds = 10):
 
     stats = np.zeros((len(values), 4))
     for ii, val in enumerate(values):
-        model = q2.dispatch(model_type, val)
+        model = q2_3.dispatch(model_type, val)
         fit_acc = np.zeros(folds)
         pred_acc = np.zeros(folds)
 
@@ -83,7 +83,7 @@ def estimation(model_type, hvalue, X, y):
         Xtr, Xte, ytr, yte = train_test_split(Xu, yu, test_size = 0.33)
         print(f'Size of train: {len(ytr)} => {len(ytr) / len(yu)}')
         print(f'Size of test: {len(yte)} => {len(yte) / len(yu)}')
-        avg_expected_loss, avg_bias, avg_var = q2.variance_bias_computation_kfold(model_type, hvalue, Xtr, ytr, Xte,
+        avg_expected_loss, avg_bias, avg_var = q2_3.variance_bias_computation_kfold(model_type, hvalue, Xtr, ytr, Xte,
                                                                          yte, random_seed=123, n_splits=10)
         bias_Class[ii] = avg_bias
         var_Class[ii] = avg_var
