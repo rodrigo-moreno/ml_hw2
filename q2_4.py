@@ -79,10 +79,10 @@ def estimation(model_type, hvalue, X, y):
     error_Class = np.zeros(len(proportions))
     for ii, per in enumerate(proportions):
         Xu, Xd, yu, yd = train_test_split(X, y, test_size = 1 - per / 100)
-        print(f'Size of used: {len(yu)}')
+        #print(f'Size of used: {len(yu)}')
         Xtr, Xte, ytr, yte = train_test_split(Xu, yu, test_size = 0.33)
-        print(f'Size of train: {len(ytr)} => {len(ytr) / len(yu)}')
-        print(f'Size of test: {len(yte)} => {len(yte) / len(yu)}')
+        #print(f'Size of train: {len(ytr)} => {len(ytr) / len(yu)}')
+        #print(f'Size of test: {len(yte)} => {len(yte) / len(yu)}')
         avg_expected_loss, avg_bias, avg_var = q2_3.variance_bias_computation_kfold(model_type, hvalue, Xtr, ytr, Xte,
                                                                          yte, random_seed=123, n_splits=10)
         bias_Class[ii] = avg_bias
