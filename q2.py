@@ -114,8 +114,10 @@ def models_assessment(model_type, hvalues, X_train, y_train, X_test, y_test):
     ax.legend([r'$\sigma^2$', r'bias$^2$', r'Error', r'$\sigma^2 + bias^2$'],
               fontsize = 24)
     ax.set_xlabel(f'Metaparameter value', fontsize = 24)
-    plt.savefig(f'{model_type}_{len(y_train)}_assessment.pdf', format = 'pdf')
-    plt.savefig(f'{model_type}_{len(y_train)}_assessment.png', format = 'png')
+    plt.savefig(f'{model_type}_{len(y_train)+len(y_test)}_assessment.pdf',
+                format = 'pdf')
+    plt.savefig(f'{model_type}_{len(y_train)+len(y_test)}_assessment.png',
+                format = 'png')
     #plt.show()
     return
 
